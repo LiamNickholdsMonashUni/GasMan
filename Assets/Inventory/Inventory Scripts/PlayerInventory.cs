@@ -1,32 +1,13 @@
+using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
-    [System.Serializable]
-    public struct Item
-    {
-        public float weight;
-        
-        public bool IsEmpty
-        {
-            get
-            {
-                if (weight == 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-    }
-
     [Header("Inventory")]
     public Item[] slots; 
-    public InventorySlotUI[] slotUI;
+    public InventoryUI[] slotUI;
     public Transform dropPoint;
 
     [Header("Settings")]
@@ -39,7 +20,24 @@ public class PlayerInventory : MonoBehaviour
     private Transform pickupTriggerObject;
     
     [SerializeField] private InventoryNearbyUI nearbyUI;
+    private PlayerMovement _playerMovement;
     
+    [SerializeField] private TextMeshProUGUI slotsCountText;
+    
+    //There are two weight UI's, one top left, on in inventory, therefore need an array
+    [SerializeField] private WeightDisplay[] weightDisplays = new WeightDisplay[2];
+    private void Awake()
+    {
+        _playerMovement = GetComponent<PlayerMovement>();
+       
+        GameObject[] objs = GameObject.FindGameObjectsWithTag("WeightDisplay");
+        
+        for (int i = 0; i < objs.Length; i++)
+        {
+            weightDisplays[i] = objs[i].GetComponent<WeightDisplay>();
+        }
+    }
+
     void Start()
     {
         slots = new Item[4];
@@ -47,6 +45,8 @@ public class PlayerInventory : MonoBehaviour
         for (int i = 0; i < slotUI.Length; i++)
             slotUI[i].Setup(i, this);
 
+        AddItem(1f);
+        
         RefreshUI();
     }
 
@@ -82,8 +82,8 @@ public class PlayerInventory : MonoBehaviour
                 slots[i] = new Item { weight = weight };
                 RefreshUI();
                 
-                BasicPlayerControls controls = GetComponent<BasicPlayerControls>();
-                controls.SetWeight(CurrentWeight);
+                RefreshWeightDisplay(currentWeight);
+                _playerMovement.SetWeight(currentWeight);
                 
                 return true;
             }
@@ -107,10 +107,12 @@ public class PlayerInventory : MonoBehaviour
         }
 
         // mark empty
+        //Use .IsEmpty? 
         slots[index].weight = 0;
     
-        var controls = GetComponent<BasicPlayerControls>();
-        controls.RemoveWeight(droppedWeight);
+        RefreshWeightDisplay(currentWeight);
+        
+        _playerMovement.SetWeight(currentWeight);
         
         RefreshUI();
     }
@@ -125,11 +127,21 @@ public class PlayerInventory : MonoBehaviour
             else
                 slotUI[i].UpdateSlot(0, false);
         }
-    }
-   
-    
 
-    public float CurrentWeight
+        UpdateSlotsCount();
+    }
+
+    private void RefreshWeightDisplay(float currenWeight)
+    {
+        foreach (var display in weightDisplays)
+        {
+            if (display != null)
+                display.Refresh(currentWeight);
+        }
+
+    }
+
+    public float currentWeight
     {
         get
         {
@@ -145,7 +157,6 @@ public class PlayerInventory : MonoBehaviour
             float total = 0f;
             int count = 0;
 
-            print("length: " + slots.Length);
             foreach (var slot in slots)
             {
                 
@@ -181,6 +192,26 @@ public class PlayerInventory : MonoBehaviour
         nearbyCollectibles.Remove(c);
         nearbyUI.RefreshNearbyUI();
         
+    }
+    
+    public void UpdateSlotsCount()
+    {
+        if (slots == null || slots.Length == 0)
+        {
+            slotsCountText.text = $"Total: 0/0";
+            return;
+        }
+
+        int occupied = 0;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (!slots[i].IsEmpty)
+            {
+                occupied++;
+            }
+        }
+
+        slotsCountText.text = $"Total: {occupied}/{slots.Length}";
     }
     
     public bool PickupNearbyAt(int index)

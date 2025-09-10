@@ -1,15 +1,14 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class WeightDisplay : MonoBehaviour
 {
-    public BasicPlayerControls player;
     public TextMeshProUGUI weightText;
 
-    void Update()
+    public void Refresh(float weight)
     {
-        // :)
-        weightText.text = $"Your Weight: {player.currentWeight:F1}";
+        weightText.text = $"Your Weight: {weight:F0}";
     }
 }

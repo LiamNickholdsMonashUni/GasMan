@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - Collectible
+  - Head
+  - Ground
+  - FinishBox
+  - WeightDisplay
   layers:
   - Default
   - TransparentFX
