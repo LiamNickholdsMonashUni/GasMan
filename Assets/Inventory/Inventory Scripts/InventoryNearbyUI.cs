@@ -84,7 +84,7 @@ public class InventoryNearbyUI : MonoBehaviour
     {
         var weightText = go.GetComponentInChildren<TextMeshProUGUI>();
         if (weightText != null)
-            weightText.text = $"Floating Value: {collectible.weight:F0}";
+            weightText.text = $"Flotation: {collectible.weight:F0}";
 
         var button = go.GetComponentInChildren<Button>();
         if (button != null)
