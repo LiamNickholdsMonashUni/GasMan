@@ -20,9 +20,20 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController cc;
     private Vector3 velocity;
     private bool isGrounded;
-
+    
+    //reference to animator component
     private Animator animator;
-
+    //tracks last frames y position
+    private float lastY;
+    //timer to stop rising and falling animations playing when spawning
+    private float vSpeedGraceTimer = 0f;
+    private const float vSpeedGraceDuration = 0.25f;
+    //tracks whther canmove changed between frames
+    private bool lastCanMove;
+    [Header("Particles")]
+    //reference to the particle system
+    public ParticleSystem gasParticles;
+    
     void Awake()
     {
         cc = GetComponent<CharacterController>();
@@ -39,12 +50,26 @@ public class PlayerMovement : MonoBehaviour
             //Position the groundCheck directly below the player, at the bottom of the CharacterController capsule.
             groundCheck.localPosition = new Vector3(0, -halfHeight, 0);
         }
-
+        
+        //gets reference to the animator in the players child object
         animator = GetComponentInChildren<Animator>();
+        //stores inital position for vertical speed calculation
+        lastY = transform.position.y;
+        //begins short grace period to stop rising and falling animations to play when player spawns
+        vSpeedGraceTimer = vSpeedGraceDuration;
+        //tracks intial movement state
+        lastCanMove = canMove;
     }
 
     void Update()
     {
+        //if changed from cant move to can move reapply grace period
+        if (canMove && !lastCanMove)
+        {
+            vSpeedGraceTimer = vSpeedGraceDuration;
+        }
+        lastCanMove = canMove;
+        
         //Always do grounded check so physics state remains correct.
         GroundCheck();
 
@@ -59,11 +84,52 @@ public class PlayerMovement : MonoBehaviour
 
             velocity.y += gravity * Time.deltaTime;
             cc.Move(velocity * Time.deltaTime);
-
+            
+            //calculates vertical speed m world postion change
+            float v = (transform.position.y - lastY) / Time.deltaTime;
+            lastY = transform.position.y;
+            
+            //applies grace period to stop the rising and falling animations playing at spawn
+            if (vSpeedGraceTimer > 0f)
+            {
+                vSpeedGraceTimer -= Time.deltaTime;
+                v = 0f;
+            }
+            else if (Mathf.Abs(v) < 0.05f)
+            {
+                v = 0f;
+            }
+            
+            //sends final vspeed value to the animator for the rising and falling
+            if (animator != null)
+            {
+                animator.SetFloat("vSpeed", v);
+            }
             return;
         }
 
         Move();
+        
+        //calculates vertical speed after moving the frame
+        float worldV = (transform.position.y - lastY) / Time.deltaTime;
+        lastY = transform.position.y;
+        
+        //applies the grace period 
+        if (vSpeedGraceTimer > 0f)
+        {
+            vSpeedGraceTimer -= Time.deltaTime;
+            worldV = 0f;
+        }
+        else if (Mathf.Abs(worldV) < 0.05f)
+        {
+            worldV = 0f;
+        }
+        
+        //sends it to the animator
+        if (animator != null)
+        {
+            animator.SetFloat("vSpeed", worldV);
+        }
     }
 
     void GroundCheck()
@@ -85,7 +151,8 @@ public class PlayerMovement : MonoBehaviour
 
         bool leftPressed = Input.GetKey(KeyCode.A);
         bool rightPressed = Input.GetKey(KeyCode.D);
-
+        
+        //sends input states to the animator
         if (animator != null)
         {
             animator.SetBool("leftPressed", leftPressed);
@@ -112,8 +179,28 @@ public class PlayerMovement : MonoBehaviour
         // Gravity
         velocity.y += gravity * Time.deltaTime;
         cc.Move(velocity * Time.deltaTime);
-
+        
+        //controls the player movement looping sound
         AudioManager.Instance?.SetMovementLoop(h != 0f);
+        
+        //plays the gas particles when the player is moving
+        if (gasParticles != null)
+        {
+            //true if moving left or right
+            bool isMoving = Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.1f;
+
+            if (isMoving && !gasParticles.isPlaying)
+            {
+                //emits the gas particles
+                gasParticles.Play();
+            }
+            else if (!isMoving && gasParticles.isPlaying)
+            {
+                //stops and clears the gas aprticles when player stops moving
+                gasParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
+
     }
 
     public void SetWeight(float w)

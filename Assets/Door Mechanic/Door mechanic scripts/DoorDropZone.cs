@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class DoorDropZone : MonoBehaviour
 {
@@ -9,7 +10,12 @@ public class DoorDropZone : MonoBehaviour
 
     [SerializeField] private GameObject attachedDoor;
     [SerializeField] private float equalAmountToOpenTheDoor;
+    //reference to the director controlling the timeline component
+    public PlayableDirector doorDirector;
 
+    public AudioClip doorOpenSound;
+    public float doorVolume = 1f;
+    
     private GameObject _collectible;
 
     private void Start()
@@ -32,9 +38,29 @@ public class DoorDropZone : MonoBehaviour
     {
         if (weightInDropZone == equalAmountToOpenTheDoor)
         {
-            openTheDoorsDoor(false);
+            if (AudioManager.Instance != null && doorOpenSound != null)
+            {
+                AudioManager.Instance.PlayOneShot2D(doorOpenSound, doorVolume);
+            }
+            
+            //checks if the director is assigned
+            if (doorDirector != null)
+        {
+            //resets timeline to 0 so plays animation from begininng
+            doorDirector.time = 0;
+            //plays the animation
+            doorDirector.Play();
+        }
+            //removes the door a second after animation finsihes did this becuase before was removing the
+            //whilst animating so added the delay so the animation plays before its removed
+            Invoke(nameof(HideDoor), 1f);
             Destroy(_collectible);
         }
+    }
+
+    private void HideDoor()
+    {
+        openTheDoorsDoor(false);
     }
     
     /// <summary>
