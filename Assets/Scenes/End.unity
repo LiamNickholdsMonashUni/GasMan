@@ -4464,6 +4464,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AudioManager
       objectReference: {fileID: 0}
+    - target: {fileID: 3102480358911917927, guid: 7b2847e6c013740fd82b4296cdb6d722, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5612907092127157676, guid: 7b2847e6c013740fd82b4296cdb6d722, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.1567563
@@ -5678,7 +5682,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1652604349092007726}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
