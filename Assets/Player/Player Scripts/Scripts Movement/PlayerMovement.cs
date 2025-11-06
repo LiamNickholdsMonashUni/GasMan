@@ -130,6 +130,12 @@ public class PlayerMovement : MonoBehaviour
         {
             animator.SetFloat("vSpeed", worldV);
         }
+
+	if (Input.GetKey(KeyCode.Escape))
+        {
+            QuitGame();
+	}
+
     }
 
     void GroundCheck()
@@ -143,6 +149,11 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundMask);
         if (isGrounded && velocity.y < 0f)
             velocity.y = -2f;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     void Move()
