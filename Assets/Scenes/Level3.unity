@@ -2632,7 +2632,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 717a81a2f8d8e954782cd5b288c1b5b4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 20.19
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 717a81a2f8d8e954782cd5b288c1b5b4, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3081,7 +3081,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: If you try to deposit the gas tank, whilst only having a single tank of
-    bouyancy 1 equipped, you float into the float and lose.
+    bouyancy 1 equipped, you float into the floor and lose.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
